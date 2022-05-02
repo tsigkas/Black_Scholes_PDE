@@ -3,9 +3,11 @@
 
 This project concern valuations of three types of options using the Black Scholes model with a finite difference method (FDM). The following option payoffs will be considered:
 
-   -  A plain vanilla call option: <img src="https://latex.codecogs.com/gif.latex?\inline&space;\max&space;(S_T&space;-K;0)"/> 
-   \item{ An asset or nothing call option: <img src="https://latex.codecogs.com/gif.latex?\inline&space;S_T&space;\cdot&space;I_{S_T&space;\ge&space;K}"/> }
-   \item{ A cash or nothing call option: <img src="https://latex.codecogs.com/gif.latex?\inline&space;I_{S_T&space;\ge&space;K}"/> }
+**A plain vanilla call option:** <img src="https://latex.codecogs.com/gif.latex?\inline&space;\max&space;(S_T&space;-K;0)"/>
+
+**An asset or nothing call option:** <img src="https://latex.codecogs.com/gif.latex?\inline&space;S_T&space;\cdot&space;I_{S_T&space;\ge&space;K}"/>
+
+**A cash or nothing call option:** <img src="https://latex.codecogs.com/gif.latex?\inline&space;I_{S_T&space;\ge&space;K}"/>
 
 where <img src="https://latex.codecogs.com/gif.latex?\inline&space;I"/> is the indicator function. These are defined below as function handles, where they are also defined as functions in terms of the variable <img src="https://latex.codecogs.com/gif.latex?\inline&space;X_t&space;=\ln&space;S_t"/>, as this change of variable will be utilised for solving the PDE with the method used in Andersen, Brotherton-Ratcliffe (1997).
 
@@ -18,9 +20,11 @@ ABR_AoN  = @(X,K) exp(X).*(exp(X) >= K);
 
 Furthermore, the PDE solver will require upper and lower bounds for the option value, i.e. what happens to the option when <img src="https://latex.codecogs.com/gif.latex?\inline&space;S_t&space;=0~\textrm{and}~S_t&space;\to&space;+\infty"/>. The first case implies that the call options are worthless, while for the upper limit, the following limits are proposed:
 
-   \item{ Plain Vanilla: <img src="https://latex.codecogs.com/gif.latex?\inline&space;S_t&space;-K\cdot&space;e^{-r(T-t)}"/> }
-   \item{ Asset or Nothing: <img src="https://latex.codecogs.com/gif.latex?\inline&space;e^{-r(T-t)}"/> }
-   -  Cash or Nothing: <img src="https://latex.codecogs.com/gif.latex?\inline&space;S_t"/> 
+**Plain Vanilla:** <img src="https://latex.codecogs.com/gif.latex?\inline&space;S_t&space;-K\cdot&space;e^{-r(T-t)}"/>
+
+**Asset or Nothing:** <img src="https://latex.codecogs.com/gif.latex?\inline&space;e^{-r(T-t)}"/>
+
+**Cash or Nothing:** <img src="https://latex.codecogs.com/gif.latex?\inline&space;S_t"/>
 
 ```matlab:Code
 randCall     = @(S,K,r,t) (S-K*exp(-r*t));
@@ -165,12 +169,12 @@ line((M+1):(M+20),C*ones(20,1),"col","red");
 title("Refining the grid in S-direction"); 
 xlabel("M"); 
 ylabel("Price of option");
-figure();
 ```
 
 ![figure_1.png](FDM_option_pricing_images/figure_1.png)
 
 ```matlab:Code
+figure();
 plot((N+1):(N+20), C_tIncr); title("Refining the grid in t-direction");
 line((N+1):(N+20),C*ones(20,1),"col","red");
 xlabel("N"); 
@@ -236,49 +240,20 @@ It can be shown that for <img src="https://latex.codecogs.com/gif.latex?\inline&
 
 ```matlab:Code
 stable = 1;
-M_test = 30;
-N_test = N;
-C_10y = BS_call(S0, K, r, vol, 10); % Analytical price for T = 10Y
-
 ```
 
 ![figure_4.png](FDM_option_pricing_images/figure_4.png)
 
 ```matlab:Code
+M_test = 30;
+N_test = N;
+C_10y = BS_call(S0, K, r, vol, 10); % Analytical price for T = 10Y
+
 while stable
    % Modify S_l och S_u considering new time
    [C_test,~] = solver_ABR(M_test, N_test, log(0.5*Sl), log(2*Su), ...
        1, K, 10, vol, r, log(S0), ABR_Call, randABR_Call, false);
    disp([M_test, C_test])
-```
-
-```text:Output
-   30.0000  408.8203
-
-   31.0000  408.0328
-
-   32.0000  408.8340
-
-   33.0000  408.1533
-
-   34.0000  408.8454
-
-   35.0000  408.2525
-
-   36.0000  408.8549
-
-   37.0000  408.3350
-
-   38.0000  408.8629
-
-   39.0000  424.5407
-
-   1.0e+03 *
-
-    0.0400    1.8439
-```
-
-```matlab:Code
    if (C_test < 0.8*C_10y || C_test > 1.2*C_10y ) 
        %Unstable if price starts diverging
        stable = 0;
@@ -296,8 +271,9 @@ lim = [(N_test-1)*(log(2*Su)-log(0.5*Sl))^2/(10*(M_test-1)^2), vol^2]
 
 The demonstration shows that the method works reasonably well for the case of a plain vanilla call option. Any european option can however be valued, by just modifying the payoff function and the boundary values entered in the FDM solver. Below, Asset or Nothing and Cash or Nothing options, as well as plain vanilla options are valued with the implicit and explicit method, and the errors compared to the theoretical pricing formulas, which are:
 
-   \item{ Cash or Nothing: <img src="https://latex.codecogs.com/gif.latex?\inline&space;e^{-rT}&space;\mathcal{N}(d_2&space;)"/> }
-   \item{ Asset or Nothing: <img src="https://latex.codecogs.com/gif.latex?\inline&space;S_t&space;\mathcal{N}(d_1&space;)"/> }
+**Cash or Nothing:** <img src="https://latex.codecogs.com/gif.latex?\inline&space;e^{-rT}&space;\mathcal{N}(d_2&space;)"/>
+
+**Asset or Nothing:** <img src="https://latex.codecogs.com/gif.latex?\inline&space;S_t&space;\mathcal{N}(d_1&space;)"/>
 
 with <img src="https://latex.codecogs.com/gif.latex?\inline&space;d_1"/> and <img src="https://latex.codecogs.com/gif.latex?\inline&space;d_2"/> defined as before, are measured.
 
@@ -305,15 +281,6 @@ with <img src="https://latex.codecogs.com/gif.latex?\inline&space;d_1"/> and <im
 M = 60;
 N = 100;
 [CoN_impl, ~] = solver_ABR(M, N, log(Sl), log(Su), 0, K, T, vol, r, ...
-```
-
-```text:Output
-lim = 1x2    
-    0.0174    0.0186
-
-```
-
-```matlab:Code
                            log(S0), ABR_CoN,  randABR_CoN,  true);
 ```
 
@@ -349,13 +316,19 @@ CoN_err = 1x2
 
 ```matlab:Code
  AoN_err = 100*abs([AoN_impl, AoN_expl]-AoN_BSM)/AoN_BSM
-Call_err = 100*abs([C_impl, C_ABR]-C)/C
 ```
 
 ```text:Output
 AoN_err = 1x2    
     3.5214    3.5093
 
+```
+
+```matlab:Code
+Call_err = 100*abs([C_impl, C_ABR]-C)/C
+```
+
+```text:Output
 Call_err = 1x2    
     0.2308    0.0577
 
