@@ -16,7 +16,7 @@ ABR_CoN  = @(X,K)         (exp(X) >= K);
 ABR_AoN  = @(X,K) exp(X).*(exp(X) >= K);
 ```
 
-Furthermore, the PDE solver will require upper and lower bounds for the option value, i.e. what happens to the option when <img src="https://latex.codecogs.com/gif.latex?\inline&space;S_t&space;=0~~S_t&space;\to&space;+\infty"/>. The first case implies that the call options are worthless, while for the upper limit, the following limits are proposed:
+Furthermore, the PDE solver will require upper and lower bounds for the option value, i.e. what happens to the option when <img src="https://latex.codecogs.com/gif.latex?\inline&space;S_t&space;=0~\textrm{and}~S_t&space;\to&space;+\infty"/>. The first case implies that the call options are worthless, while for the upper limit, the following limits are proposed:
 
    \item{ Plain Vanilla: <img src="https://latex.codecogs.com/gif.latex?\inline&space;S_t&space;-K\cdot&space;e^{-r(T-t)}"/> }
    \item{ Asset or Nothing: <img src="https://latex.codecogs.com/gif.latex?\inline&space;e^{-r(T-t)}"/> }
@@ -44,7 +44,7 @@ Using this, one can find the implied volatility of the option by setting the Bla
 
 <img src="https://latex.codecogs.com/gif.latex?\begin{array}{l}&space;C_t&space;=S_t&space;\mathcal{N}(d_1&space;)-Ke^{-r(T-t)}&space;\mathcal{N}(d_2&space;)\\&space;d_1&space;=\frac{\ln&space;\frac{S_t&space;}{K}+(r+\sigma^2&space;/2)(T-t)}{\sigma&space;\sqrt{T-t}}\\&space;d_2&space;=d_1&space;-\sigma&space;\sqrt{T-t}&space;\end{array}"/>
 
- equal to the market price and solving for the volatility <img src="https://latex.codecogs.com/gif.latex?\inline&space;\sigma"/>. As that equation has no analytical solution, numerical methods must be used. In this case, Steffensen's method is used, where the root seeking is given by:
+equal to the market price and solving for the volatility <img src="https://latex.codecogs.com/gif.latex?\inline&space;\sigma"/>. As that equation has no analytical solution, numerical methods must be used. In this case, Steffensen's method is used, where the root seeking is given by:
 
 <img src="https://latex.codecogs.com/gif.latex?\begin{array}{l}&space;x_{n+1}&space;=x_n&space;+\frac{f(x_n&space;)}{g(x_n&space;)}\\&space;g(x)=\frac{f(x+f(x))}{f(x)}-1&space;\end{array}"/>
 
@@ -103,11 +103,11 @@ Solving this for a particular value of <img src="https://latex.codecogs.com/gif.
 
 It can thus easily be LU-decomposed, after which solving <img src="https://latex.codecogs.com/gif.latex?\inline&space;{{LUf}}_i&space;=b_i"/> can be done easily by backwards and forward substitution.
 
-The final parameters to decide upon before running the numerical solver are the upper and lower bounds of the grid <img src="https://latex.codecogs.com/gif.latex?\inline&space;(S_u&space;,S_l&space;)"/>. This value is set such that the probability of the spot price being inside the grid at maturity is 99.9%. With <img src="https://latex.codecogs.com/gif.latex?\inline&space;\ln&space;(S_T&space;)\sim&space;N(\ln&space;(S_0&space;)+\left(r-\frac{\sigma^2&space;}{2}\right)T,\sigma^2&space;T)"/> following from the Black-Scholes assumptions of <img src="https://latex.codecogs.com/gif.latex?\inline&space;S_t"/> following a Geometric Browninan Motion, one can solve for <img src="https://latex.codecogs.com/gif.latex?\inline&space;S_l"/> as:
+The final parameters to decide upon before running the numerical solver are the upper and lower bounds of the grid <img src="https://latex.codecogs.com/gif.latex?\inline&space;(S_u&space;,S_l&space;)"/>. This value is set such that the probability of the spot price being inside the grid at maturity is 99.9%. With <img src="https://latex.codecogs.com/gif.latex?\inline&space;\ln&space;(S_T&space;)\sim&space;\mathcal{N}(\ln&space;(S_0&space;)+\left(r-\frac{\sigma^2&space;}{2}\right)T,\sigma^2&space;T)"/> following from the Black-Scholes assumptions of <img src="https://latex.codecogs.com/gif.latex?\inline&space;S_t"/> following a Geometric Browninan Motion, one can solve for <img src="https://latex.codecogs.com/gif.latex?\inline&space;S_l"/> as:
 
 <img src="https://latex.codecogs.com/gif.latex?\begin{array}{l}&space;P[S_T&space;\le&space;S_l&space;]=P[\ln&space;(S_T&space;)\le&space;\ln&space;(S_l&space;)]=P\left\lbrack&space;Z\le&space;\frac{\ln&space;(S_l&space;)-\ln&space;(S_0&space;)-\left(r-\frac{\sigma^2&space;}{2}\right)T}{\sigma&space;\sqrt{T}}\right\rbrack&space;=0.0005\iff&space;\\&space;S_l&space;=S_0&space;\exp&space;\left\lbrace&space;\sigma&space;\sqrt{T}\Phi^{-1}&space;(0.0005)+\left(r-\frac{\sigma^2&space;}{2}\right)T\right\rbrace&space;=51.26&space;\end{array}"/>
 
-Where <img src="https://latex.codecogs.com/gif.latex?\inline&space;Z\sim&space;N(0,1)"/> and <img src="https://latex.codecogs.com/gif.latex?\inline&space;\Phi"/> is the CDF of the standard Gaussian distribution. Similiarly (substituting 0.0005 for 0.9995 in the above expression) one gets <img src="https://latex.codecogs.com/gif.latex?\inline&space;S_u&space;=191.19"/>.
+Where <img src="https://latex.codecogs.com/gif.latex?\inline&space;Z\sim&space;\mathcal{N}(0,1)"/> and <img src="https://latex.codecogs.com/gif.latex?\inline&space;\Phi"/> is the CDF of the standard Gaussian distribution. Similiarly (substituting 0.0005 for 0.9995 in the above expression) one gets <img src="https://latex.codecogs.com/gif.latex?\inline&space;S_u&space;=191.19"/>.
 
 Solving the system with <img src="https://latex.codecogs.com/gif.latex?\inline&space;\theta&space;=1"/>, <img src="https://latex.codecogs.com/gif.latex?\inline&space;N=80"/> and <img src="https://latex.codecogs.com/gif.latex?\inline&space;M=30"/>, and interpolating between the nodes with a cubic spline yields:
 
@@ -165,12 +165,12 @@ line((M+1):(M+20),C*ones(20,1),"col","red");
 title("Refining the grid in S-direction"); 
 xlabel("M"); 
 ylabel("Price of option");
+figure();
 ```
 
 ![figure_1.png](FDM_option_pricing_images/figure_1.png)
 
 ```matlab:Code
-figure();
 plot((N+1):(N+20), C_tIncr); title("Refining the grid in t-direction");
 line((N+1):(N+20),C*ones(20,1),"col","red");
 xlabel("N"); 
@@ -236,20 +236,49 @@ It can be shown that for <img src="https://latex.codecogs.com/gif.latex?\inline&
 
 ```matlab:Code
 stable = 1;
+M_test = 30;
+N_test = N;
+C_10y = BS_call(S0, K, r, vol, 10); % Analytical price for T = 10Y
+
 ```
 
 ![figure_4.png](FDM_option_pricing_images/figure_4.png)
 
 ```matlab:Code
-M_test = 30;
-N_test = N;
-C_10y = BS_call(S0, K, r, vol, 10); % Analytical price for T = 10Y
-
 while stable
    % Modify S_l och S_u considering new time
    [C_test,~] = solver_ABR(M_test, N_test, log(0.5*Sl), log(2*Su), ...
        1, K, 10, vol, r, log(S0), ABR_Call, randABR_Call, false);
    disp([M_test, C_test])
+```
+
+```text:Output
+   30.0000  408.8203
+
+   31.0000  408.0328
+
+   32.0000  408.8340
+
+   33.0000  408.1533
+
+   34.0000  408.8454
+
+   35.0000  408.2525
+
+   36.0000  408.8549
+
+   37.0000  408.3350
+
+   38.0000  408.8629
+
+   39.0000  424.5407
+
+   1.0e+03 *
+
+    0.0400    1.8439
+```
+
+```matlab:Code
    if (C_test < 0.8*C_10y || C_test > 1.2*C_10y ) 
        %Unstable if price starts diverging
        stable = 0;
@@ -276,6 +305,15 @@ with <img src="https://latex.codecogs.com/gif.latex?\inline&space;d_1"/> and <im
 M = 60;
 N = 100;
 [CoN_impl, ~] = solver_ABR(M, N, log(Sl), log(Su), 0, K, T, vol, r, ...
+```
+
+```text:Output
+lim = 1x2    
+    0.0174    0.0186
+
+```
+
+```matlab:Code
                            log(S0), ABR_CoN,  randABR_CoN,  true);
 ```
 
@@ -311,19 +349,13 @@ CoN_err = 1x2
 
 ```matlab:Code
  AoN_err = 100*abs([AoN_impl, AoN_expl]-AoN_BSM)/AoN_BSM
+Call_err = 100*abs([C_impl, C_ABR]-C)/C
 ```
 
 ```text:Output
 AoN_err = 1x2    
     3.5214    3.5093
 
-```
-
-```matlab:Code
-Call_err = 100*abs([C_impl, C_ABR]-C)/C
-```
-
-```text:Output
 Call_err = 1x2    
     0.2308    0.0577
 
